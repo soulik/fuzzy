@@ -20,6 +20,11 @@ do
 	tip['average'] = L {fuzzy.triangle, {10, 15, 20}}
 	tip['generous'] = L {fuzzy.triangle, {20, 25, 30}}
 
+	local feel = F {'feel', {0, 10}}
+	feel['bad'] = L {fuzzy.gauss, {1.5, 0}}
+	feel['average'] = L {fuzzy.gauss, {1.5, 5}}
+	feel['great'] = L {fuzzy.gauss, {1.5, 10}}
+
 	local r1 = R(1)
 	r1.premise = service['poor'] + food['rancid']
 	r1.implication = tip['cheap']
@@ -32,6 +37,18 @@ do
 	r3.premise = service['excelent'] + food['delicious']
 	r3.implication = tip['generous']
 
+	local r4 = R(1)
+	r4.premise = service['poor'] + food['rancid']
+	r4.implication = feel['bad']
+
+	local r5 = R(1)
+	r5.premise = service['good'] * (-food['rancid'])
+	r5.implication = feel['average']
+
+	local r6 = R(1)
+	r6.premise = service['excelent'] * food['delicious']
+	r6.implication = feel['great']
+
 	local values = {
 		service = 8.0,
 		food = 6.5,
@@ -40,6 +57,8 @@ do
 	-- @22.2115
 	local result = f1(values)
 
-	print(result)
+	for k,v in pairs(result) do
+		print(k, v)
+	end
 
 end

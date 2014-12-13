@@ -129,6 +129,9 @@ M.solver = function()
 	local fuzzySets = {
 	}
 
+	local outputFuzzySets = {
+	}
+
 	-- linguistic variable
 	s_out.L = function(def)
 		assert(type(def)=='table')
@@ -320,17 +323,24 @@ M.solver = function()
 		for name, value in pairs(inputs) do
 			fuzzySets[name].value = value
 		end
-
-		local aggResult = aggregateResults((function()
-			local results = {}
-			for i, rule in ipairs(rules) do
-				local premise = rule.premise
-				results[i] = computeImplication(rule)
+		--outputFuzzySets
+		local partialResults = {}
+		for i, rule in ipairs(rules) do
+			local implicationFSs = rule.implication.fuzzySets
+			for FS, _ in pairs(implicationFSs) do
+				local result = partialResults[FS.name]
+				if not result then
+					result = {}; partialResults[FS.name] = result
+				end
+				table.insert(result, computeImplication(rule))
 			end
-			return results		
-		end)())
+		end
+		for name, results in pairs(partialResults) do
+			local aggResult = aggregateResults(results)
+			outputFuzzySets[name] = defuzzifyResult(aggResult)
+		end
 
-		return defuzzifyResult(aggResult)
+		return outputFuzzySets
 	end
 
 	setmetatable(s_out, {
